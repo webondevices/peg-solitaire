@@ -20977,8 +20977,11 @@ var Board = function (_React$Component) {
                 y: false
             },
             running: true,
-            score: null
+            score: null,
+            steps: 0,
+            time: 0
         };
+        _this.gameTimer = null;
         return _this;
     }
 
@@ -20996,31 +20999,41 @@ var Board = function (_React$Component) {
     }, {
         key: 'componentDidMount',
         value: function componentDidMount() {
+            var _this2 = this;
+
             this.setState({ score: this.getScore() });
+            this.gameTimer = setInterval(function () {
+                _this2.setState({ time: _this2.state.time + 1 });
+            }, 1000);
         }
     }, {
         key: 'stepPossible',
         value: function stepPossible(x, y) {
             var b = this.state.board;
-            var stepUpPossible = y - 2 >= 0 ? b[y - 1][x] === true && b[y - 2][x] === false : false;
-            var stepRightPossible = x + 2 < b[y].length ? b[y][x + 1] === true && b[y][x + 2] === false : false;
-            var stepDownPossible = y + 2 < b.length ? b[y + 1][x] === true && b[y + 2][x] === false : false;
-            var stepLeftPossible = b[y][x - 1] === true && b[y][x - 2] === false;
+            if (b[y][x] !== null) {
+                var stepUpPossible = y - 2 >= 0 ? b[y - 1][x] === true && b[y - 2][x] === false : false;
+                var stepRightPossible = x + 2 < b[y].length ? b[y][x + 1] === true && b[y][x + 2] === false : false;
+                var stepDownPossible = y + 2 < b.length ? b[y + 1][x] === true && b[y + 2][x] === false : false;
+                var stepLeftPossible = x - 2 >= 0 ? b[y][x - 1] === true && b[y][x - 2] === false : false;
 
-            return stepUpPossible || stepRightPossible || stepDownPossible || stepLeftPossible;
+                return stepUpPossible || stepRightPossible || stepDownPossible || stepLeftPossible;
+            } else {
+                return false;
+            }
         }
     }, {
-        key: 'isGameFinished',
-        value: function isGameFinished() {
-            var _this2 = this;
+        key: 'moveLeftOnTable',
+        value: function moveLeftOnTable() {
+            var _this3 = this;
 
-            var movePossible = this.state.board.some(function (row, y) {
-                row.some(function (peg, x) {
-                    return _this2.stepPossible(x, y);
+            var moveLeftOnTable = this.state.board.some(function (row, y) {
+                return row.some(function (peg, x) {
+                    console.log(x, y, ' move possible: ', _this3.stepPossible(x, y));
+                    return _this3.stepPossible(x, y);
                 });
             });
 
-            return movePossible;
+            return moveLeftOnTable;
         }
     }, {
         key: 'selectPeg',
@@ -21040,10 +21053,10 @@ var Board = function (_React$Component) {
                 var board = this.state.board;
                 var s = this.state.selectedPeg;
 
-                var stepUp = s.x === x && s.y - 2 === y;
-                var stepRight = s.x + 2 === x && s.y === y;
-                var stepDown = s.x === x && s.y + 2 === y;
-                var stepLeft = s.x - 2 === x && s.y === y;
+                var stepUp = s.x === x && s.y - 2 === y && board[s.y - 1][s.x] === true;
+                var stepRight = s.x + 2 === x && s.y === y && board[s.y][s.x + 1] === true;
+                var stepDown = s.x === x && s.y + 2 === y && board[s.y + 1][s.x] === true;
+                var stepLeft = s.x - 2 === x && s.y === y && board[s.y][s.x - 1] === true;
 
                 if (stepUp) {
                     board[s.y - 2][s.x] = true;
@@ -21069,41 +21082,83 @@ var Board = function (_React$Component) {
                     board[s.y][s.x] = false;
                 }
 
+                console.log('moveLeft', this.moveLeftOnTable());
+                var gameFinished = !this.moveLeftOnTable();
+
+                if (gameFinished) {
+                    console.log('clear interval');
+                    clearInterval(this.gameTimer);
+                }
+
                 this.setState({
                     selectedPeg: { x: false, y: false },
                     board: board,
-                    running: this.isGameFinished()
+                    running: !gameFinished,
+                    score: this.getScore(),
+                    steps: stepUp || stepRight || stepDown || stepLeft ? this.state.steps + 1 : this.state.steps
                 });
             }
         }
     }, {
         key: 'render',
         value: function render() {
-            var _this3 = this;
+            var _this4 = this;
 
             return _react2.default.createElement(
-                'table',
-                { className: 'solitaire-board' },
+                'div',
+                null,
                 _react2.default.createElement(
-                    'tbody',
-                    null,
-                    this.state.board.map(function (row, y) {
-                        return _react2.default.createElement(
-                            'tr',
-                            { key: y },
-                            row.map(function (peg, x) {
-                                var selected = x == _this3.state.selectedPeg.x && y == _this3.state.selectedPeg.y;
-                                var offBoard = peg === null;
-                                return _react2.default.createElement(
-                                    'td',
-                                    { key: x, className: peg === null ? 'field-off' : '' },
-                                    _react2.default.createElement('div', { onClick: function onClick() {
-                                            return _this3.selectPeg(peg, selected, x, y);
-                                        }, className: (peg ? 'peg-on' : offBoard ? 'peg-outside' : 'peg-off') + ' ' + (selected && peg ? 'peg-selected' : '') })
-                                );
-                            })
-                        );
-                    })
+                    'div',
+                    { className: 'results-table' },
+                    _react2.default.createElement(
+                        'p',
+                        null,
+                        'Pegs remaining: ',
+                        this.state.score
+                    ),
+                    _react2.default.createElement(
+                        'p',
+                        null,
+                        'Steps taken: ',
+                        this.state.steps
+                    ),
+                    _react2.default.createElement(
+                        'p',
+                        null,
+                        'Time: ',
+                        this.state.time
+                    ),
+                    _react2.default.createElement(
+                        'p',
+                        null,
+                        'Game status: ',
+                        this.state.running ? 'Running' : 'Game Over'
+                    )
+                ),
+                _react2.default.createElement(
+                    'table',
+                    { className: 'solitaire-board ' + (this.state.running ? 'running' : 'game-over') },
+                    _react2.default.createElement(
+                        'tbody',
+                        null,
+                        this.state.board.map(function (row, y) {
+                            return _react2.default.createElement(
+                                'tr',
+                                { key: y },
+                                row.map(function (peg, x) {
+                                    var selected = x == _this4.state.selectedPeg.x && y == _this4.state.selectedPeg.y;
+                                    var offBoard = peg === null;
+                                    return _react2.default.createElement(
+                                        'td',
+                                        { key: x, className: peg === null ? 'field-off' : '' },
+                                        _react2.default.createElement('div', { onClick: function onClick() {
+                                                if (_this4.state.running) _this4.selectPeg(peg, selected, x, y);
+                                            }, className: (peg ? 'peg-on' : offBoard ? 'peg-outside' : 'peg-off') + ' ' + (selected && peg ? 'peg-selected' : '') })
+                                    );
+                                })
+                            );
+                        })
+                    )
                 )
             );
         }

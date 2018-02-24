@@ -23,4 +23,8 @@ body {
     transition: background-color 300ms;
 }
 
+* {
+    box-sizing: border-box;
+}
+
 @import './Solitaire';
