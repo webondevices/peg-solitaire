@@ -1,0 +1,43 @@
+.solitaire-board {
+    & td {
+        width: 50px;
+        height: 50px;
+        padding: 0;
+        border: 1px solid gray;
+        text-align: center;
+        box-sizing: border-box;
+
+        &.field-off {
+            visibility: hidden;
+        }
+
+        & > div {
+            transition: transform 300ms, background-color 300ms;
+        }
+
+        & > .peg-on {
+            width: 30px;
+            height: 30px;
+            margin-top: 4px;
+            cursor: pointer;
+            border-radius: 50%;
+            background-color: gray;
+            display: inline-block;
+        }
+
+        & > .peg-off {
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+        }
+
+        & > .peg-outside {
+            display: none;
+        }
+
+        & > .peg-selected {
+            background-color: blue;
+            transform: scale(1.2);
+        }
+    }
+}
