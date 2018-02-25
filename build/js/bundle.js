@@ -20954,6 +20954,132 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _Play = require('./Play/Play.jsx');
+
+var _Play2 = _interopRequireDefault(_Play);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+// import Learn from './Learn/Learn.jsx';
+
+var Menu = function (_React$Component) {
+    _inherits(Menu, _React$Component);
+
+    function Menu() {
+        _classCallCheck(this, Menu);
+
+        var _this = _possibleConstructorReturn(this, (Menu.__proto__ || Object.getPrototypeOf(Menu)).call(this));
+
+        _this.state = {
+            selection: null
+        };
+        return _this;
+    }
+
+    _createClass(Menu, [{
+        key: 'render',
+        value: function render() {
+            var _this2 = this;
+
+            // Display menu if not selected anything
+            if (this.state.selection === null) {
+                return _react2.default.createElement(
+                    'div',
+                    { className: 'game-menu' },
+                    _react2.default.createElement(
+                        'button',
+                        { onClick: function onClick() {
+                                return _this2.setState({ selection: 'play' });
+                            } },
+                        'Play'
+                    ),
+                    _react2.default.createElement(
+                        'button',
+                        { onClick: function onClick() {
+                                return _this2.setState({ selection: 'learn' });
+                            } },
+                        'Learn'
+                    )
+                );
+            } else {
+                if (this.state.selection === 'play') return _react2.default.createElement(_Play2.default, null);
+                if (this.state.selection === 'learn') return _react2.default.createElement(Learn, null);
+            }
+        }
+    }]);
+
+    return Menu;
+}(_react2.default.Component);
+
+exports.default = Menu;
+
+},{"./Play/Play.jsx":199,"react":197}],199:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _Board = require('./../Solitaire/Board.jsx');
+
+var _Board2 = _interopRequireDefault(_Board);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+// import Learn from './Solitaire/Learn.jsx';
+
+var Play = function (_React$Component) {
+    _inherits(Play, _React$Component);
+
+    function Play() {
+        _classCallCheck(this, Play);
+
+        return _possibleConstructorReturn(this, (Play.__proto__ || Object.getPrototypeOf(Play)).apply(this, arguments));
+    }
+
+    _createClass(Play, [{
+        key: 'render',
+        value: function render() {
+            return _react2.default.createElement(_Board2.default, null);
+        }
+    }]);
+
+    return Play;
+}(_react2.default.Component);
+
+exports.default = Play;
+
+},{"./../Solitaire/Board.jsx":200,"react":197}],200:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -21164,7 +21290,7 @@ var Board = function (_React$Component) {
 
 exports.default = Board;
 
-},{"react":197}],199:[function(require,module,exports){
+},{"react":197}],201:[function(require,module,exports){
 'use strict';
 
 var _react = require('react');
@@ -21175,12 +21301,12 @@ var _reactDom = require('react-dom');
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
-var _Board = require('./Solitaire/Board.jsx');
+var _Menu = require('./Menu.jsx');
 
-var _Board2 = _interopRequireDefault(_Board);
+var _Menu2 = _interopRequireDefault(_Menu);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-_reactDom2.default.render(_react2.default.createElement(_Board2.default, null), document.getElementById('react-app'));
+_reactDom2.default.render(_react2.default.createElement(_Menu2.default, null), document.getElementById('react-app'));
 
-},{"./Solitaire/Board.jsx":198,"react":197,"react-dom":16}]},{},[199]);
+},{"./Menu.jsx":198,"react":197,"react-dom":16}]},{},[201]);

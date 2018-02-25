@@ -1,5 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Board from './Solitaire/Board.jsx';
+import Menu from './Menu.jsx';
 
-ReactDOM.render(<Board />, document.getElementById('react-app'));
+ReactDOM.render(<Menu />, document.getElementById('react-app'));

@@ -1,4 +1,5 @@
 .solitaire-board {
+    background-image: url('../images/wood.jpg');
     &.game-over {
         .peg-on {
             opacity: 0.5;
@@ -29,6 +30,8 @@
             background-color: gray;
             transform: scale(1);
             opacity: 1;
+            background-image: url('../images/marble.jpg');
+            background-size: 100px;
         }
 
         & > .peg-off {
@@ -40,8 +43,8 @@
         }
 
         & > .peg-selected {
-            background-color: blue;
             transform: scale(1.2);
+            filter: drop-shadow(0 0 3px black);
         }
     }
 }
