@@ -39,10 +39,10 @@ class Board extends React.Component {
     stepPossible (x, y) {
         const b = this.state.board;
         if (b[y][x] !== null) {
-            const stepUpPossible = y-2 >= 0 ? b[y-1][x] === true && b[y-2][x] === false : false;
-            const stepRightPossible = x+2 < b[y].length ? b[y][x+1] === true && b[y][x+2] === false : false;
-            const stepDownPossible = y+2 < b.length ? b[y+1][x] === true && b[y+2][x] === false : false;
-            const stepLeftPossible = x-2 >= 0 ? b[y][x-1] === true && b[y][x-2] === false : false;
+            const stepUpPossible = y-2 >= 0 ? b[y][x] && b[y-1][x] && b[y-2][x] === false : false;
+            const stepRightPossible = x+2 < b[y].length ? b[y][x] && b[y][x+1] && b[y][x+2] === false : false;
+            const stepDownPossible = y+2 < b.length ? b[y][x] && b[y+1][x] && b[y+2][x] === false : false;
+            const stepLeftPossible = x-2 >= 0 ? b[y][x] && b[y][x-1] && b[y][x-2] === false : false;
 
             return stepUpPossible || stepRightPossible || stepDownPossible || stepLeftPossible;    
         } else {
@@ -52,14 +52,7 @@ class Board extends React.Component {
     }
 
     moveLeftOnTable () {
-        const moveLeftOnTable = this.state.board.some((row, y) => {
-            return row.some((peg, x) => {
-                console.log(x, y, ' move possible: ', this.stepPossible(x, y));
-                return this.stepPossible(x, y)
-            });
-        });
-
-        return moveLeftOnTable;
+        return this.state.board.some((row, y) => row.some((peg, x) => this.stepPossible(x, y)));
     }
 
     selectPeg (peg, selected, x, y) {
@@ -78,10 +71,10 @@ class Board extends React.Component {
             const board = this.state.board;
             const s = this.state.selectedPeg;
 
-            const stepUp = s.x === x && s.y-2 === y && board[s.y-1][s.x] === true;
-            const stepRight = s.x+2 === x && s.y === y && board[s.y][s.x+1] === true;
-            const stepDown = s.x === x && s.y+2 === y && board[s.y+1][s.x] === true;
-            const stepLeft = s.x-2 === x && s.y === y && board[s.y][s.x-1] === true;
+            const stepUp = s.x === x && s.y-2 === y && board[s.y-1][s.x];
+            const stepRight = s.x+2 === x && s.y === y && board[s.y][s.x+1];
+            const stepDown = s.x === x && s.y+2 === y && board[s.y+1][s.x];
+            const stepLeft = s.x-2 === x && s.y === y && board[s.y][s.x-1];
             
             if (stepUp) {
                 board[s.y-2][s.x] = true;
@@ -107,11 +100,9 @@ class Board extends React.Component {
                 board[s.y][s.x] = false;
             }
 
-            console.log('moveLeft', this.moveLeftOnTable());
             const gameFinished = !this.moveLeftOnTable();
 
             if (gameFinished) {
-                console.log('clear interval');
                 clearInterval(this.gameTimer);
             }
 

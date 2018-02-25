@@ -21011,10 +21011,10 @@ var Board = function (_React$Component) {
         value: function stepPossible(x, y) {
             var b = this.state.board;
             if (b[y][x] !== null) {
-                var stepUpPossible = y - 2 >= 0 ? b[y - 1][x] === true && b[y - 2][x] === false : false;
-                var stepRightPossible = x + 2 < b[y].length ? b[y][x + 1] === true && b[y][x + 2] === false : false;
-                var stepDownPossible = y + 2 < b.length ? b[y + 1][x] === true && b[y + 2][x] === false : false;
-                var stepLeftPossible = x - 2 >= 0 ? b[y][x - 1] === true && b[y][x - 2] === false : false;
+                var stepUpPossible = y - 2 >= 0 ? b[y][x] && b[y - 1][x] && b[y - 2][x] === false : false;
+                var stepRightPossible = x + 2 < b[y].length ? b[y][x] && b[y][x + 1] && b[y][x + 2] === false : false;
+                var stepDownPossible = y + 2 < b.length ? b[y][x] && b[y + 1][x] && b[y + 2][x] === false : false;
+                var stepLeftPossible = x - 2 >= 0 ? b[y][x] && b[y][x - 1] && b[y][x - 2] === false : false;
 
                 return stepUpPossible || stepRightPossible || stepDownPossible || stepLeftPossible;
             } else {
@@ -21026,14 +21026,11 @@ var Board = function (_React$Component) {
         value: function moveLeftOnTable() {
             var _this3 = this;
 
-            var moveLeftOnTable = this.state.board.some(function (row, y) {
+            return this.state.board.some(function (row, y) {
                 return row.some(function (peg, x) {
-                    console.log(x, y, ' move possible: ', _this3.stepPossible(x, y));
                     return _this3.stepPossible(x, y);
                 });
             });
-
-            return moveLeftOnTable;
         }
     }, {
         key: 'selectPeg',
@@ -21053,10 +21050,10 @@ var Board = function (_React$Component) {
                 var board = this.state.board;
                 var s = this.state.selectedPeg;
 
-                var stepUp = s.x === x && s.y - 2 === y && board[s.y - 1][s.x] === true;
-                var stepRight = s.x + 2 === x && s.y === y && board[s.y][s.x + 1] === true;
-                var stepDown = s.x === x && s.y + 2 === y && board[s.y + 1][s.x] === true;
-                var stepLeft = s.x - 2 === x && s.y === y && board[s.y][s.x - 1] === true;
+                var stepUp = s.x === x && s.y - 2 === y && board[s.y - 1][s.x];
+                var stepRight = s.x + 2 === x && s.y === y && board[s.y][s.x + 1];
+                var stepDown = s.x === x && s.y + 2 === y && board[s.y + 1][s.x];
+                var stepLeft = s.x - 2 === x && s.y === y && board[s.y][s.x - 1];
 
                 if (stepUp) {
                     board[s.y - 2][s.x] = true;
@@ -21082,11 +21079,9 @@ var Board = function (_React$Component) {
                     board[s.y][s.x] = false;
                 }
 
-                console.log('moveLeft', this.moveLeftOnTable());
                 var gameFinished = !this.moveLeftOnTable();
 
                 if (gameFinished) {
-                    console.log('clear interval');
                     clearInterval(this.gameTimer);
                 }
 
