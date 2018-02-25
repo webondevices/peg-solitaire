@@ -1,7 +1,8 @@
 import React from 'react';
-import Board from './../Solitaire/Board.jsx';
+import Board from './Board.jsx';
+import Table from './Table.jsx';
 
-class Play extends React.Component {
+class Game extends React.Component {
     constructor () {
         super();
         this.game = new Board();
@@ -25,7 +26,7 @@ class Play extends React.Component {
         }, 1000);
     }
 
-    selectPeg (peg, selected, x, y) {
+    selectPeg (peg, x, y) {
 
         // If we clicked on a peg
         if (peg) {
@@ -38,33 +39,32 @@ class Play extends React.Component {
 
         // If we clicked on an empty field
         if (!peg) {
-            const board = this.game.board;
             const s = this.state.selectedPeg;
 
-            const stepUp = s.x === x && s.y-2 === y && board[s.y-1][s.x];
-            const stepRight = s.x+2 === x && s.y === y && board[s.y][s.x+1];
-            const stepDown = s.x === x && s.y+2 === y && board[s.y+1][s.x];
-            const stepLeft = s.x-2 === x && s.y === y && board[s.y][s.x-1];
+            const isStepUp = this.game.isStepUp(s.x, s.y, x, y);
+            const isStepRight = this.game.isStepRight(s.x, s.y, x, y);
+            const isStepDown = this.game.isStepDown(s.x, s.y, x, y);
+            const isStepLeft = this.game.isStepLeft(s.x, s.y, x, y);
             
-            if (stepUp) {
+            if (isStepUp) {
                 this.game.setPeg([s.y-2], [s.x], true);
                 this.game.setPeg([s.y-1], [s.x], false);
                 this.game.setPeg([s.y], [s.x], false);
             }
 
-            if (stepRight) {
+            if (isStepRight) {
                 this.game.setPeg([s.y], [s.x+2], true);
                 this.game.setPeg([s.y], [s.x+1], false);
                 this.game.setPeg([s.y], [s.x], false);
             }
 
-            if (stepDown) {
+            if (isStepDown) {
                 this.game.setPeg([s.y+2], [s.x], true);
                 this.game.setPeg([s.y+1], [s.x], false);
                 this.game.setPeg([s.y], [s.x], false);
             }
 
-            if (stepLeft) {
+            if (isStepLeft) {
                 this.game.setPeg([s.y], [s.x-2], true);
                 this.game.setPeg([s.y], [s.x-1], false);
                 this.game.setPeg([s.y], [s.x], false);
@@ -78,10 +78,9 @@ class Play extends React.Component {
 
             this.setState({
                 selectedPeg: {x:false, y:false},
-                board,
                 running: !gameFinished,
                 score: this.game.getScore(),
-                steps: stepUp || stepRight || stepDown || stepLeft ? this.state.steps + 1 : this.state.steps
+                steps: isStepUp || isStepRight || isStepDown || isStepLeft ? this.state.steps + 1 : this.state.steps
             });
         }
     }
@@ -95,29 +94,14 @@ class Play extends React.Component {
                     <p>Time: {this.state.time}</p>
                     <p>Game status: {this.state.running ? 'Running' : 'Game Over'}</p>
                 </div>
-                <table className={`solitaire-board ${this.state.running ? 'running' : 'game-over'}`}>
-                    <tbody>
-                    {
-                        this.game.board.map((row, y) => {
-                            return (<tr key={y}>
-                                {row.map((peg, x) => {
-                                    const selected = x == this.state.selectedPeg.x && y == this.state.selectedPeg.y;
-                                    const offBoard = peg === null;
-                                    return (
-                                        <td key={x} className={peg === null ? 'field-off' : ''}>
-                                            <div onClick={() => {if (this.state.running) this.selectPeg(peg, selected, x, y)}} className={`${peg ? 'peg-on' : (offBoard ? 'peg-outside' : 'peg-off')} ${selected && peg ? 'peg-selected' : ''}`}></div>
-                                        </td>
-                                    );
-                                })}
-                            </tr>);
-                        })
-                    }
-                    </tbody>
-                </table>
-
+                <Table
+                    running={this.state.running}
+                    board={this.game.board}
+                    selectedPeg={this.state.selectedPeg}
+                    selectPeg={this.selectPeg.bind(this)}/>
             </div>
         );
     }
 }
 
-export default Play;
+export default Game;

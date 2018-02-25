@@ -38,6 +38,22 @@ class Board {
     setPeg (x, y, value) {
         this.board[x][y] = value;
     }
+
+    isStepUp (fromX, fromY, toX, toY) {
+        return fromX === toX && fromY-2 === toY && this.board[fromY-1][fromX];
+    }
+
+    isStepRight (fromX, fromY, toX, toY) {
+        return fromX+2 === toX && fromY === toY && this.board[fromY][fromX+1];
+    }
+
+    isStepDown (fromX, fromY, toX, toY) {
+        return fromX === toX && fromY+2 === toY && this.board[fromY+1][fromX];
+    }
+
+    isStepLeft (fromX, fromY, toX, toY) {
+        return fromX-2 === toX && fromY === toY && this.board[fromY][fromX-1];
+    }
 }
 
 export default Board;

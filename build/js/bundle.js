@@ -20954,9 +20954,9 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
-var _Play = require('./Play/Play.jsx');
+var _Game = require('./Solitaire/Game.jsx');
 
-var _Play2 = _interopRequireDefault(_Play);
+var _Game2 = _interopRequireDefault(_Game);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -21008,7 +21008,7 @@ var Menu = function (_React$Component) {
                     )
                 );
             } else {
-                if (this.state.selection === 'play') return _react2.default.createElement(_Play2.default, null);
+                if (this.state.selection === 'play') return _react2.default.createElement(_Game2.default, null);
                 if (this.state.selection === 'learn') return _react2.default.createElement(Learn, null);
             }
         }
@@ -21019,197 +21019,7 @@ var Menu = function (_React$Component) {
 
 exports.default = Menu;
 
-},{"./Play/Play.jsx":199,"react":197}],199:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
-
-var _Board = require('./../Solitaire/Board.jsx');
-
-var _Board2 = _interopRequireDefault(_Board);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var Play = function (_React$Component) {
-    _inherits(Play, _React$Component);
-
-    function Play() {
-        _classCallCheck(this, Play);
-
-        var _this = _possibleConstructorReturn(this, (Play.__proto__ || Object.getPrototypeOf(Play)).call(this));
-
-        _this.game = new _Board2.default();
-        _this.state = {
-            selectedPeg: {
-                x: false,
-                y: false
-            },
-            running: true,
-            score: null,
-            steps: 0,
-            time: 0
-        };
-        _this.gameTimer = null;
-        return _this;
-    }
-
-    _createClass(Play, [{
-        key: 'componentDidMount',
-        value: function componentDidMount() {
-            var _this2 = this;
-
-            this.setState({ score: this.game.getScore() });
-            this.gameTimer = setInterval(function () {
-                _this2.setState({ time: _this2.state.time + 1 });
-            }, 1000);
-        }
-    }, {
-        key: 'selectPeg',
-        value: function selectPeg(peg, selected, x, y) {
-
-            // If we clicked on a peg
-            if (peg) {
-                if (this.state.selectedPeg.x == x && this.state.selectedPeg.y == y) {
-                    this.setState({ 'selectedPeg': { x: false, y: false } });
-                } else {
-                    this.setState({ 'selectedPeg': { x: x, y: y } });
-                }
-            }
-
-            // If we clicked on an empty field
-            if (!peg) {
-                var board = this.game.board;
-                var s = this.state.selectedPeg;
-
-                var stepUp = s.x === x && s.y - 2 === y && board[s.y - 1][s.x];
-                var stepRight = s.x + 2 === x && s.y === y && board[s.y][s.x + 1];
-                var stepDown = s.x === x && s.y + 2 === y && board[s.y + 1][s.x];
-                var stepLeft = s.x - 2 === x && s.y === y && board[s.y][s.x - 1];
-
-                if (stepUp) {
-                    this.game.setPeg([s.y - 2], [s.x], true);
-                    this.game.setPeg([s.y - 1], [s.x], false);
-                    this.game.setPeg([s.y], [s.x], false);
-                }
-
-                if (stepRight) {
-                    this.game.setPeg([s.y], [s.x + 2], true);
-                    this.game.setPeg([s.y], [s.x + 1], false);
-                    this.game.setPeg([s.y], [s.x], false);
-                }
-
-                if (stepDown) {
-                    this.game.setPeg([s.y + 2], [s.x], true);
-                    this.game.setPeg([s.y + 1], [s.x], false);
-                    this.game.setPeg([s.y], [s.x], false);
-                }
-
-                if (stepLeft) {
-                    this.game.setPeg([s.y], [s.x - 2], true);
-                    this.game.setPeg([s.y], [s.x - 1], false);
-                    this.game.setPeg([s.y], [s.x], false);
-                }
-
-                var gameFinished = !this.game.moveLeftOnTable();
-
-                if (gameFinished) {
-                    clearInterval(this.gameTimer);
-                }
-
-                this.setState({
-                    selectedPeg: { x: false, y: false },
-                    board: board,
-                    running: !gameFinished,
-                    score: this.game.getScore(),
-                    steps: stepUp || stepRight || stepDown || stepLeft ? this.state.steps + 1 : this.state.steps
-                });
-            }
-        }
-    }, {
-        key: 'render',
-        value: function render() {
-            var _this3 = this;
-
-            return _react2.default.createElement(
-                'div',
-                null,
-                _react2.default.createElement(
-                    'div',
-                    { className: 'results-table' },
-                    _react2.default.createElement(
-                        'p',
-                        null,
-                        'Pegs remaining: ',
-                        this.state.score
-                    ),
-                    _react2.default.createElement(
-                        'p',
-                        null,
-                        'Steps taken: ',
-                        this.state.steps
-                    ),
-                    _react2.default.createElement(
-                        'p',
-                        null,
-                        'Time: ',
-                        this.state.time
-                    ),
-                    _react2.default.createElement(
-                        'p',
-                        null,
-                        'Game status: ',
-                        this.state.running ? 'Running' : 'Game Over'
-                    )
-                ),
-                _react2.default.createElement(
-                    'table',
-                    { className: 'solitaire-board ' + (this.state.running ? 'running' : 'game-over') },
-                    _react2.default.createElement(
-                        'tbody',
-                        null,
-                        this.game.board.map(function (row, y) {
-                            return _react2.default.createElement(
-                                'tr',
-                                { key: y },
-                                row.map(function (peg, x) {
-                                    var selected = x == _this3.state.selectedPeg.x && y == _this3.state.selectedPeg.y;
-                                    var offBoard = peg === null;
-                                    return _react2.default.createElement(
-                                        'td',
-                                        { key: x, className: peg === null ? 'field-off' : '' },
-                                        _react2.default.createElement('div', { onClick: function onClick() {
-                                                if (_this3.state.running) _this3.selectPeg(peg, selected, x, y);
-                                            }, className: (peg ? 'peg-on' : offBoard ? 'peg-outside' : 'peg-off') + ' ' + (selected && peg ? 'peg-selected' : '') })
-                                    );
-                                })
-                            );
-                        })
-                    )
-                )
-            );
-        }
-    }]);
-
-    return Play;
-}(_react2.default.Component);
-
-exports.default = Play;
-
-},{"./../Solitaire/Board.jsx":200,"react":197}],200:[function(require,module,exports){
+},{"./Solitaire/Game.jsx":200,"react":197}],199:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -21275,6 +21085,26 @@ var Board = function () {
         value: function setPeg(x, y, value) {
             this.board[x][y] = value;
         }
+    }, {
+        key: 'isStepUp',
+        value: function isStepUp(fromX, fromY, toX, toY) {
+            return fromX === toX && fromY - 2 === toY && this.board[fromY - 1][fromX];
+        }
+    }, {
+        key: 'isStepRight',
+        value: function isStepRight(fromX, fromY, toX, toY) {
+            return fromX + 2 === toX && fromY === toY && this.board[fromY][fromX + 1];
+        }
+    }, {
+        key: 'isStepDown',
+        value: function isStepDown(fromX, fromY, toX, toY) {
+            return fromX === toX && fromY + 2 === toY && this.board[fromY + 1][fromX];
+        }
+    }, {
+        key: 'isStepLeft',
+        value: function isStepLeft(fromX, fromY, toX, toY) {
+            return fromX - 2 === toX && fromY === toY && this.board[fromY][fromX - 1];
+        }
     }]);
 
     return Board;
@@ -21282,7 +21112,245 @@ var Board = function () {
 
 exports.default = Board;
 
-},{"react":197}],201:[function(require,module,exports){
+},{"react":197}],200:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _Board = require('./Board.jsx');
+
+var _Board2 = _interopRequireDefault(_Board);
+
+var _Table = require('./Table.jsx');
+
+var _Table2 = _interopRequireDefault(_Table);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Game = function (_React$Component) {
+    _inherits(Game, _React$Component);
+
+    function Game() {
+        _classCallCheck(this, Game);
+
+        var _this = _possibleConstructorReturn(this, (Game.__proto__ || Object.getPrototypeOf(Game)).call(this));
+
+        _this.game = new _Board2.default();
+        _this.state = {
+            selectedPeg: {
+                x: false,
+                y: false
+            },
+            running: true,
+            score: null,
+            steps: 0,
+            time: 0
+        };
+        _this.gameTimer = null;
+        return _this;
+    }
+
+    _createClass(Game, [{
+        key: 'componentDidMount',
+        value: function componentDidMount() {
+            var _this2 = this;
+
+            this.setState({ score: this.game.getScore() });
+            this.gameTimer = setInterval(function () {
+                _this2.setState({ time: _this2.state.time + 1 });
+            }, 1000);
+        }
+    }, {
+        key: 'selectPeg',
+        value: function selectPeg(peg, x, y) {
+
+            // If we clicked on a peg
+            if (peg) {
+                if (this.state.selectedPeg.x == x && this.state.selectedPeg.y == y) {
+                    this.setState({ 'selectedPeg': { x: false, y: false } });
+                } else {
+                    this.setState({ 'selectedPeg': { x: x, y: y } });
+                }
+            }
+
+            // If we clicked on an empty field
+            if (!peg) {
+                var s = this.state.selectedPeg;
+
+                var isStepUp = this.game.isStepUp(s.x, s.y, x, y);
+                var isStepRight = this.game.isStepRight(s.x, s.y, x, y);
+                var isStepDown = this.game.isStepDown(s.x, s.y, x, y);
+                var isStepLeft = this.game.isStepLeft(s.x, s.y, x, y);
+
+                if (isStepUp) {
+                    this.game.setPeg([s.y - 2], [s.x], true);
+                    this.game.setPeg([s.y - 1], [s.x], false);
+                    this.game.setPeg([s.y], [s.x], false);
+                }
+
+                if (isStepRight) {
+                    this.game.setPeg([s.y], [s.x + 2], true);
+                    this.game.setPeg([s.y], [s.x + 1], false);
+                    this.game.setPeg([s.y], [s.x], false);
+                }
+
+                if (isStepDown) {
+                    this.game.setPeg([s.y + 2], [s.x], true);
+                    this.game.setPeg([s.y + 1], [s.x], false);
+                    this.game.setPeg([s.y], [s.x], false);
+                }
+
+                if (isStepLeft) {
+                    this.game.setPeg([s.y], [s.x - 2], true);
+                    this.game.setPeg([s.y], [s.x - 1], false);
+                    this.game.setPeg([s.y], [s.x], false);
+                }
+
+                var gameFinished = !this.game.moveLeftOnTable();
+
+                if (gameFinished) {
+                    clearInterval(this.gameTimer);
+                }
+
+                this.setState({
+                    selectedPeg: { x: false, y: false },
+                    running: !gameFinished,
+                    score: this.game.getScore(),
+                    steps: isStepUp || isStepRight || isStepDown || isStepLeft ? this.state.steps + 1 : this.state.steps
+                });
+            }
+        }
+    }, {
+        key: 'render',
+        value: function render() {
+            return _react2.default.createElement(
+                'div',
+                null,
+                _react2.default.createElement(
+                    'div',
+                    { className: 'results-table' },
+                    _react2.default.createElement(
+                        'p',
+                        null,
+                        'Pegs remaining: ',
+                        this.state.score
+                    ),
+                    _react2.default.createElement(
+                        'p',
+                        null,
+                        'Steps taken: ',
+                        this.state.steps
+                    ),
+                    _react2.default.createElement(
+                        'p',
+                        null,
+                        'Time: ',
+                        this.state.time
+                    ),
+                    _react2.default.createElement(
+                        'p',
+                        null,
+                        'Game status: ',
+                        this.state.running ? 'Running' : 'Game Over'
+                    )
+                ),
+                _react2.default.createElement(_Table2.default, {
+                    running: this.state.running,
+                    board: this.game.board,
+                    selectedPeg: this.state.selectedPeg,
+                    selectPeg: this.selectPeg.bind(this) })
+            );
+        }
+    }]);
+
+    return Game;
+}(_react2.default.Component);
+
+exports.default = Game;
+
+},{"./Board.jsx":199,"./Table.jsx":201,"react":197}],201:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Table = function (_React$Component) {
+    _inherits(Table, _React$Component);
+
+    function Table() {
+        _classCallCheck(this, Table);
+
+        return _possibleConstructorReturn(this, (Table.__proto__ || Object.getPrototypeOf(Table)).apply(this, arguments));
+    }
+
+    _createClass(Table, [{
+        key: 'render',
+        value: function render() {
+            var _this2 = this;
+
+            return _react2.default.createElement(
+                'table',
+                { className: 'solitaire-board ' + (this.props.running ? 'running' : 'game-over') },
+                _react2.default.createElement(
+                    'tbody',
+                    null,
+                    this.props.board.map(function (row, y) {
+                        return _react2.default.createElement(
+                            'tr',
+                            { key: y },
+                            row.map(function (peg, x) {
+                                var selected = x == _this2.props.selectedPeg.x && y == _this2.props.selectedPeg.y;
+                                var offBoard = peg === null;
+                                return _react2.default.createElement(
+                                    'td',
+                                    { key: x, className: peg === null ? 'field-off' : '' },
+                                    _react2.default.createElement('div', { onClick: function onClick() {
+                                            if (_this2.props.running) _this2.props.selectPeg(peg, x, y);
+                                        }, className: (peg ? 'peg-on' : offBoard ? 'peg-outside' : 'peg-off') + ' ' + (selected && peg ? 'peg-selected' : '') })
+                                );
+                            })
+                        );
+                    })
+                )
+            );
+        }
+    }]);
+
+    return Table;
+}(_react2.default.Component);
+
+exports.default = Table;
+
+},{"react":197}],202:[function(require,module,exports){
 'use strict';
 
 var _react = require('react');
@@ -21301,4 +21369,4 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 _reactDom2.default.render(_react2.default.createElement(_Menu2.default, null), document.getElementById('react-app'));
 
-},{"./Menu.jsx":198,"react":197,"react-dom":16}]},{},[201]);
+},{"./Menu.jsx":198,"react":197,"react-dom":16}]},{},[202]);

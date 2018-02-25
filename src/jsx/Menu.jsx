@@ -1,5 +1,5 @@
 import React from 'react';
-import Play from './Play/Play.jsx';
+import Game from './Solitaire/Game.jsx';
 // import Learn from './Learn/Learn.jsx';
 
 class Menu extends React.Component {
@@ -19,7 +19,7 @@ class Menu extends React.Component {
                 </div>
             );
         } else {
-            if (this.state.selection === 'play')  return <Play />;
+            if (this.state.selection === 'play')  return <Game />;
             if (this.state.selection === 'learn') return <Learn />;
         }
     }
