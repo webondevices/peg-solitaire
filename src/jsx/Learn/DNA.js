@@ -1,14 +1,17 @@
 import util from './util.js';
+import Board from './Board.jsx';
 
 class DNA {
-    constructor(num){
+    constructor(){
 
         // The genetic sequence
         this.genes = [];
         this.fitness = 0;
         
-        // Random DNA generated from characters
-        this.genes = Array(num).fill(null);
+        // Random DNA generated from an attempt at playing
+        this.board = new Board();
+
+        this.genes = this.board.getRandomGame();
         this.genes = this.genes.map(() => util.newChar());
     }
 

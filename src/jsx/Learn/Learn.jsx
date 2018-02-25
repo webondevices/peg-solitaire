@@ -11,14 +11,14 @@ class World extends React.Component {
         };
 
         // Simulation settings
-        this.targetPhrase = 'Hello Web on Devices';
+        this.targetScore = 1;
         this.mutationRate = 0.01;
-        this.populationSize = 300;
+        this.populationSize = 100;
 
         this.running = true;
 
         // Initialise population
-        this.population = new Population(this.targetPhrase, this.mutationRate, this.populationSize);
+        this.population = new Population(this.targetScore, this.mutationRate, this.populationSize);
 
         this.draw = this.draw.bind(this);
     }

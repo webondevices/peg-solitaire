@@ -13,7 +13,7 @@ class Population {
 
         // Fill population with DNA instances
         this.population = Array(populationSize).fill(null);
-        this.population = this.population.map(() => new DNA(this.target.length));
+        this.population = this.population.map(() => new DNA());
 
         this.calcPopulationFitness();
     }
