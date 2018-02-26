@@ -1,5 +1,7 @@
 import React from 'react';
 import Population from './Population.js';
+import Board from './../Solitaire/Board.jsx';
+import Table from './../Solitaire/Table.jsx';
 
 class World extends React.Component {
 
@@ -7,7 +9,9 @@ class World extends React.Component {
         super();
 
         this.state = {
-            result: ''
+            result: '',
+            running: true,
+            board: null
         };
 
         // Simulation settings
@@ -18,7 +22,7 @@ class World extends React.Component {
         this.running = true;
 
         // Initialise population
-        this.population = new Population(this.targetScore, this.mutationRate, this.populationSize);
+        this.population = new Population(this.targetScore, this.mutationRate, this.populationSize, this.updateBoard);
 
         this.draw = this.draw.bind(this);
     }
@@ -53,12 +57,23 @@ class World extends React.Component {
         if (this.running) window.requestAnimationFrame(this.draw);
     }
 
+    updateBoard (board) {
+        this.setState({board});
+    }
+
     render() {
         const myStyle = this.running ? {backgroundColor: 'red'} : {backgroundColor: 'green'};
 
         return (
             <div style={myStyle} className="result">
                 { this.state.result }
+                {this.state.board !== null ?
+                    <Table
+                        running={this.state.running}
+                        board={this.currentBoard}
+                        selectedPeg={{x: false, y: false}}
+                        selectPeg={() => {}} /> : ''
+                }
             </div>
         );
     }

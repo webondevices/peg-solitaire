@@ -46,28 +46,28 @@ class Game extends React.Component {
             const isStepDown = this.game.isStepDown(s.x, s.y, x, y);
             const isStepLeft = this.game.isStepLeft(s.x, s.y, x, y);
             
-            if (isStepUp) {
-                this.game.setPeg([s.y-2], [s.x], true);
-                this.game.setPeg([s.y-1], [s.x], false);
-                this.game.setPeg([s.y], [s.x], false);
+            if (isStepUp) { 
+                this.game.setPeg(s.y-2, s.x, true);
+                this.game.setPeg(s.y-1, s.x, false);
+                this.game.setPeg(s.y, s.x, false);
             }
 
             if (isStepRight) {
-                this.game.setPeg([s.y], [s.x+2], true);
-                this.game.setPeg([s.y], [s.x+1], false);
-                this.game.setPeg([s.y], [s.x], false);
+                this.game.setPeg(s.y, s.x+2, true);
+                this.game.setPeg(s.y, s.x+1, false);
+                this.game.setPeg(s.y, s.x, false);
             }
 
             if (isStepDown) {
-                this.game.setPeg([s.y+2], [s.x], true);
-                this.game.setPeg([s.y+1], [s.x], false);
-                this.game.setPeg([s.y], [s.x], false);
+                this.game.setPeg(s.y+2, s.x, true);
+                this.game.setPeg(s.y+1, s.x, false);
+                this.game.setPeg(s.y, s.x, false);
             }
 
             if (isStepLeft) {
-                this.game.setPeg([s.y], [s.x-2], true);
-                this.game.setPeg([s.y], [s.x-1], false);
-                this.game.setPeg([s.y], [s.x], false);
+                this.game.setPeg(s.y, s.x-2, true);
+                this.game.setPeg(s.y, s.x-1, false);
+                this.game.setPeg(s.y, s.x, false);
             }
 
             const gameFinished = !this.game.moveLeftOnTable();

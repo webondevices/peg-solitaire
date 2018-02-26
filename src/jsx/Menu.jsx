@@ -1,6 +1,6 @@
 import React from 'react';
 import Game from './Solitaire/Game.jsx';
-// import Learn from './Learn/Learn.jsx';
+import Learn from './Learn/Learn.jsx';
 
 class Menu extends React.Component {
     constructor () {

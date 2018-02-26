@@ -2,7 +2,7 @@ import DNA from './DNA.js';
 import util from './util.js';
 
 class Population {
-    constructor(t, m, populationSize) {
+    constructor(t, m, populationSize, updateBoard) {
         this.target = t;
         this.mutationRate = m;
         this.generations = 0;

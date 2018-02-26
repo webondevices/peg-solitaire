@@ -20950,13 +20950,114 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _util = require('./util.js');
+
+var _util2 = _interopRequireDefault(_util);
+
+var _Board = require('./../Solitaire/Board.jsx');
+
+var _Board2 = _interopRequireDefault(_Board);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var DNA = function () {
+    function DNA() {
+        _classCallCheck(this, DNA);
+
+        // The genetic sequence
+        this.game = new _Board2.default();
+        this.genes = this.game.getRandomGame();
+        this.fitness = 0;
+    }
+
+    // Converts character array to a String
+
+
+    _createClass(DNA, [{
+        key: 'getPhrase',
+        value: function getPhrase() {
+            return this.genes.join('');
+        }
+
+        // Fitness function (returns floating point % of "correct" characters)
+
+    }, {
+        key: 'calcFitness',
+        value: function calcFitness(target) {
+            this.fitness = (33 - this.game.getScore()) / 32;
+        }
+
+        // Cross DNA with partner to produce child
+
+    }, {
+        key: 'crossover',
+        value: function crossover(partner) {
+            var _this = this;
+
+            // Initialise new child
+            var child = new DNA(this.genes.length);
+            var midpoint = _util2.default.randomInt(0, this.genes.length - 1);
+
+            // Cross DNA from two parents from each side of midpoint
+            this.genes.forEach(function (gene, i) {
+
+                if (i > midpoint) {
+                    child.genes[i] = _this.genes[i];
+                } else {
+                    child.genes[i] = partner.genes[i];
+                }
+            });
+
+            return child;
+        }
+
+        // picks a new random character based on a mutation probability
+
+    }, {
+        key: 'mutate',
+        value: function mutate(mutationRate) {
+            var _this2 = this;
+
+            this.genes.forEach(function (gene, i) {
+
+                if (Math.random(0, 1) < mutationRate) {
+                    _this2.genes[i] = _util2.default.newChar();
+                }
+            });
+        }
+    }]);
+
+    return DNA;
+}();
+
+exports.default = DNA;
+
+},{"./../Solitaire/Board.jsx":203,"./util.js":201}],199:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
-var _Game = require('./Solitaire/Game.jsx');
+var _Population = require('./Population.js');
 
-var _Game2 = _interopRequireDefault(_Game);
+var _Population2 = _interopRequireDefault(_Population);
+
+var _Board = require('./../Solitaire/Board.jsx');
+
+var _Board2 = _interopRequireDefault(_Board);
+
+var _Table = require('./../Solitaire/Table.jsx');
+
+var _Table2 = _interopRequireDefault(_Table);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -20966,7 +21067,319 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-// import Learn from './Learn/Learn.jsx';
+var World = function (_React$Component) {
+    _inherits(World, _React$Component);
+
+    function World() {
+        _classCallCheck(this, World);
+
+        var _this = _possibleConstructorReturn(this, (World.__proto__ || Object.getPrototypeOf(World)).call(this));
+
+        _this.state = {
+            result: '',
+            running: true,
+            board: null
+        };
+
+        // Simulation settings
+        _this.targetScore = 1;
+        _this.mutationRate = 0.01;
+        _this.populationSize = 100;
+
+        _this.running = true;
+
+        // Initialise population
+        _this.population = new _Population2.default(_this.targetScore, _this.mutationRate, _this.populationSize, _this.updateBoard);
+
+        _this.draw = _this.draw.bind(_this);
+        return _this;
+    }
+
+    _createClass(World, [{
+        key: 'componentDidMount',
+        value: function componentDidMount() {
+
+            // Start simulation
+            this.draw();
+        }
+    }, {
+        key: 'draw',
+        value: function draw() {
+
+            // Generate weighed mating pool with the fittest members
+            this.population.naturalSelection();
+
+            // Generate new population of children from parents in the mating pool
+            this.population.generate();
+
+            // Calculate fitness score of the new population
+            this.population.calcPopulationFitness();
+
+            // Find the fittest member of the population and see if target is reached
+            this.population.evaluate();
+
+            // If target phrase is found, stop
+            if (this.population.isFinished()) this.running = false;
+
+            // Display best result so far
+            this.setState({ result: this.population.getBest() });
+
+            // Loop and start new generation
+            if (this.running) window.requestAnimationFrame(this.draw);
+        }
+    }, {
+        key: 'updateBoard',
+        value: function updateBoard(board) {
+            this.setState({ board: board });
+        }
+    }, {
+        key: 'render',
+        value: function render() {
+            var myStyle = this.running ? { backgroundColor: 'red' } : { backgroundColor: 'green' };
+
+            return _react2.default.createElement(
+                'div',
+                { style: myStyle, className: 'result' },
+                this.state.result,
+                this.state.board !== null ? _react2.default.createElement(_Table2.default, {
+                    running: this.state.running,
+                    board: this.currentBoard,
+                    selectedPeg: { x: false, y: false },
+                    selectPeg: function selectPeg() {} }) : ''
+            );
+        }
+    }]);
+
+    return World;
+}(_react2.default.Component);
+
+exports.default = World;
+
+},{"./../Solitaire/Board.jsx":203,"./../Solitaire/Table.jsx":205,"./Population.js":200,"react":197}],200:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _DNA = require('./DNA.js');
+
+var _DNA2 = _interopRequireDefault(_DNA);
+
+var _util = require('./util.js');
+
+var _util2 = _interopRequireDefault(_util);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Population = function () {
+    function Population(t, m, populationSize, updateBoard) {
+        _classCallCheck(this, Population);
+
+        this.target = t;
+        this.mutationRate = m;
+        this.generations = 0;
+        this.perfectScore = 1;
+        this.finished = false;
+        this.matingPool = [];
+        this.best = '';
+
+        // Fill population with DNA instances
+        this.population = Array(populationSize).fill(null);
+        this.population = this.population.map(function () {
+            return new _DNA2.default();
+        });
+
+        this.calcPopulationFitness();
+    }
+
+    // Calculate fitness value for every member of the population
+
+
+    _createClass(Population, [{
+        key: 'calcPopulationFitness',
+        value: function calcPopulationFitness() {
+            var _this = this;
+
+            this.population.forEach(function (member) {
+                member.calcFitness(_this.target);
+            });
+        }
+
+        // Generate a weighed mating pool
+
+    }, {
+        key: 'naturalSelection',
+        value: function naturalSelection() {
+            var _this2 = this;
+
+            var maxFitness = 0;
+
+            this.matingPool = [];
+
+            // Find the highest fitness value in the population
+            this.population.forEach(function (member) {
+                maxFitness = member.fitness > maxFitness ? member.fitness : maxFitness;
+            });
+
+            // Based on fitness, each member is added to the mating pool a weighed number of times
+            // higher fitness = more instance in pool = more likely to be picked as a parent
+            // lower fitness = less instance in pool = less likely to be picked as a parent
+            this.population.forEach(function (member) {
+                var fitness = _util2.default.map(member.fitness, 0, maxFitness, 0, 1);
+
+                // Arbitrary multiplier
+                var n = Math.floor(fitness * 50);
+                for (; n >= 0; n--) {
+                    _this2.matingPool.push(member);
+                }
+            });
+        }
+
+        // Create a new generation
+
+    }, {
+        key: 'generate',
+        value: function generate() {
+            var _this3 = this;
+
+            this.population.forEach(function (member, i) {
+
+                // Random index for the pool
+                var a = _util2.default.randomInt(0, _this3.matingPool.length - 1);
+                var b = _util2.default.randomInt(0, _this3.matingPool.length - 1);
+
+                // Picking a random item from the pool
+                var partnerA = _this3.matingPool[a];
+                var partnerB = _this3.matingPool[b];
+
+                // Generating a child with DNA crossover
+                var child = partnerA.crossover(partnerB);
+
+                // Mutate DNA for diversity
+                child.mutate(_this3.mutationRate);
+
+                // Add child to the population
+                _this3.population[i] = child;
+            });
+
+            this.generations += 1;
+        }
+    }, {
+        key: 'getBest',
+        value: function getBest() {
+            return this.best;
+        }
+    }, {
+        key: 'evaluate',
+        value: function evaluate() {
+            var worldrecord = 0.0;
+            var index = 0;
+
+            // Find the fittest member of the population
+            this.population.forEach(function (member, i) {
+                if (member.fitness > worldrecord) {
+                    index = i;
+                    worldrecord = member.fitness;
+                }
+            });
+
+            // Get best result so far
+            this.best = this.population[index].getPhrase();
+
+            // Stop simulation if found result
+            if (worldrecord === this.perfectScore) this.finished = true;
+        }
+    }, {
+        key: 'isFinished',
+        value: function isFinished() {
+            return this.finished;
+        }
+    }, {
+        key: 'getGenerations',
+        value: function getGenerations() {
+            return this.generations;
+        }
+
+        // Get average fitness for the population
+
+    }, {
+        key: 'getAverageFitness',
+        value: function getAverageFitness() {
+            var total = 0;
+
+            this.population.forEach(function (member) {
+                total += member.fitness;
+            });
+
+            return total / this.population.length;
+        }
+    }]);
+
+    return Population;
+}();
+
+exports.default = Population;
+
+},{"./DNA.js":198,"./util.js":201}],201:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+var util = {
+    map: function map(value, low1, high1, low2, high2) {
+        return low2 + (high2 - low2) * (value - low1) / (high1 - low1);
+    },
+
+    randomInt: function randomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1) + min);
+    },
+
+    newChar: function newChar() {
+        var c = this.randomInt(63, 122 - 1);
+
+        if (c === 63) c = 32;
+        if (c === 64) c = 46;
+
+        return String.fromCharCode(c);
+    }
+};
+
+exports.default = util;
+
+},{}],202:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _Game = require('./Solitaire/Game.jsx');
+
+var _Game2 = _interopRequireDefault(_Game);
+
+var _Learn = require('./Learn/Learn.jsx');
+
+var _Learn2 = _interopRequireDefault(_Learn);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var Menu = function (_React$Component) {
     _inherits(Menu, _React$Component);
@@ -21009,7 +21422,7 @@ var Menu = function (_React$Component) {
                 );
             } else {
                 if (this.state.selection === 'play') return _react2.default.createElement(_Game2.default, null);
-                if (this.state.selection === 'learn') return _react2.default.createElement(Learn, null);
+                if (this.state.selection === 'learn') return _react2.default.createElement(_Learn2.default, null);
             }
         }
     }]);
@@ -21019,7 +21432,7 @@ var Menu = function (_React$Component) {
 
 exports.default = Menu;
 
-},{"./Solitaire/Game.jsx":200,"react":197}],199:[function(require,module,exports){
+},{"./Learn/Learn.jsx":199,"./Solitaire/Game.jsx":204,"react":197}],203:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -21044,19 +21457,118 @@ var Board = function () {
     }
 
     _createClass(Board, [{
+        key: 'stepUpPossible',
+        value: function stepUpPossible(x, y) {
+            var b = this.board;
+            return y - 2 >= 0 ? b[y][x] === true && b[y - 1][x] === true && b[y - 2][x] === false : false;
+        }
+    }, {
+        key: 'stepRightPossible',
+        value: function stepRightPossible(x, y) {
+            var b = this.board;
+            return x + 2 < b[y].length ? b[y][x] === true && b[y][x + 1] === true && b[y][x + 2] === false : false;
+        }
+    }, {
+        key: 'stepDownPossible',
+        value: function stepDownPossible(x, y) {
+            var b = this.board;
+            return y + 2 < b.length ? b[y][x] === true && b[y + 1][x] === true && b[y + 2][x] === false : false;
+        }
+    }, {
+        key: 'stepLeftPossible',
+        value: function stepLeftPossible(x, y) {
+            var b = this.board;
+            return x - 2 >= 0 ? b[y][x] === true && b[y][x - 1] === true && b[y][x - 2] === false : false;
+        }
+    }, {
         key: 'stepPossible',
         value: function stepPossible(x, y) {
-            var b = this.board;
-            if (b[y][x] !== null) {
-                var stepUpPossible = y - 2 >= 0 ? b[y][x] && b[y - 1][x] && b[y - 2][x] === false : false;
-                var stepRightPossible = x + 2 < b[y].length ? b[y][x] && b[y][x + 1] && b[y][x + 2] === false : false;
-                var stepDownPossible = y + 2 < b.length ? b[y][x] && b[y + 1][x] && b[y + 2][x] === false : false;
-                var stepLeftPossible = x - 2 >= 0 ? b[y][x] && b[y][x - 1] && b[y][x - 2] === false : false;
-
-                return stepUpPossible || stepRightPossible || stepDownPossible || stepLeftPossible;
+            if (this.board[y][x] !== null) {
+                return this.stepUpPossible(x, y) || this.stepRightPossible(x, y) || this.stepDownPossible(x, y) || this.stepLeftPossible(x, y);
             } else {
                 return false;
             }
+        }
+    }, {
+        key: 'getRandomGame',
+        value: function getRandomGame() {
+            var _this = this;
+
+            var gameDNA = [];
+
+            var _loop = function _loop() {
+                var peg = [];
+                var pegsLeft = [];
+                _this.board.forEach(function (row, y) {
+                    return row.forEach(function (peg, x) {
+                        return peg ? pegsLeft.push([x, y]) : null;
+                    });
+                });
+                pegsLeft = pegsLeft.filter(function (coord) {
+                    return coord !== null;
+                });
+
+                for (;;) {
+                    var randomNum = Math.floor(Math.random() * pegsLeft.length);
+                    peg = pegsLeft[randomNum];
+
+                    if (_this.stepPossible(peg[0], peg[1])) {
+                        break;
+                    } else {
+                        pegsLeft.splice(pegsLeft.findIndex(function (c) {
+                            return c[0] === peg[0] && c[1] === peg[1];
+                        }), 1);
+                        continue;
+                    }
+                }
+
+                var directions = ['Up', 'Right', 'Down', 'Left'];
+                var randomDirection = '';
+
+                for (;;) {
+                    randomDirection = directions[Math.floor(Math.random() * directions.length)];
+                    if (_this['step' + randomDirection + 'Possible'](peg[0], peg[1])) {
+                        break;
+                    } else {
+                        directions.splice(directions.indexOf(randomDirection), 1);
+                        continue;
+                    }
+                }
+
+                if (randomDirection === 'Up') {
+                    _this.setPeg(peg[1] - 2, peg[0], true);
+                    _this.setPeg(peg[1] - 1, peg[0], false);
+                    _this.setPeg(peg[1], peg[0], false);
+                    gameDNA.push('U' + peg[0] + peg[1]);
+                }
+
+                if (randomDirection === 'Right') {
+                    _this.setPeg(peg[1], peg[0] + 2, true);
+                    _this.setPeg(peg[1], peg[0] + 1, false);
+                    _this.setPeg(peg[1], peg[0], false);
+                    gameDNA.push('R' + peg[0] + peg[1]);
+                }
+
+                if (randomDirection === 'Down') {
+                    _this.setPeg(peg[1] + 2, peg[0], true);
+                    _this.setPeg(peg[1] + 1, peg[0], false);
+                    _this.setPeg(peg[1], peg[0], false);
+                    gameDNA.push('D' + peg[0] + peg[1]);
+                }
+
+                if (randomDirection === 'Left') {
+                    _this.setPeg(peg[1], peg[0] - 2, true);
+                    _this.setPeg(peg[1], peg[0] - 1, false);
+                    _this.setPeg(peg[1], peg[0], false);
+                    gameDNA.push('L' + peg[0] + peg[1]);
+                }
+            };
+
+            do {
+                _loop();
+            } while (this.moveLeftOnTable());
+
+            return gameDNA;
         }
     }, {
         key: 'getScore',
@@ -21072,17 +21584,20 @@ var Board = function () {
     }, {
         key: 'moveLeftOnTable',
         value: function moveLeftOnTable() {
-            var _this = this;
+            var _this2 = this;
 
             return this.board.some(function (row, y) {
                 return row.some(function (peg, x) {
-                    return _this.stepPossible(x, y);
+                    return _this2.stepPossible(x, y);
                 });
             });
         }
     }, {
         key: 'setPeg',
         value: function setPeg(x, y, value) {
+            if (this.board[x][y] === undefined) {
+                console.log('undef: ', x, y, value);
+            }
             this.board[x][y] = value;
         }
     }, {
@@ -21112,7 +21627,7 @@ var Board = function () {
 
 exports.default = Board;
 
-},{"react":197}],200:[function(require,module,exports){
+},{"react":197}],204:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -21197,27 +21712,27 @@ var Game = function (_React$Component) {
                 var isStepLeft = this.game.isStepLeft(s.x, s.y, x, y);
 
                 if (isStepUp) {
-                    this.game.setPeg([s.y - 2], [s.x], true);
-                    this.game.setPeg([s.y - 1], [s.x], false);
-                    this.game.setPeg([s.y], [s.x], false);
+                    this.game.setPeg(s.y - 2, s.x, true);
+                    this.game.setPeg(s.y - 1, s.x, false);
+                    this.game.setPeg(s.y, s.x, false);
                 }
 
                 if (isStepRight) {
-                    this.game.setPeg([s.y], [s.x + 2], true);
-                    this.game.setPeg([s.y], [s.x + 1], false);
-                    this.game.setPeg([s.y], [s.x], false);
+                    this.game.setPeg(s.y, s.x + 2, true);
+                    this.game.setPeg(s.y, s.x + 1, false);
+                    this.game.setPeg(s.y, s.x, false);
                 }
 
                 if (isStepDown) {
-                    this.game.setPeg([s.y + 2], [s.x], true);
-                    this.game.setPeg([s.y + 1], [s.x], false);
-                    this.game.setPeg([s.y], [s.x], false);
+                    this.game.setPeg(s.y + 2, s.x, true);
+                    this.game.setPeg(s.y + 1, s.x, false);
+                    this.game.setPeg(s.y, s.x, false);
                 }
 
                 if (isStepLeft) {
-                    this.game.setPeg([s.y], [s.x - 2], true);
-                    this.game.setPeg([s.y], [s.x - 1], false);
-                    this.game.setPeg([s.y], [s.x], false);
+                    this.game.setPeg(s.y, s.x - 2, true);
+                    this.game.setPeg(s.y, s.x - 1, false);
+                    this.game.setPeg(s.y, s.x, false);
                 }
 
                 var gameFinished = !this.game.moveLeftOnTable();
@@ -21282,7 +21797,7 @@ var Game = function (_React$Component) {
 
 exports.default = Game;
 
-},{"./Board.jsx":199,"./Table.jsx":201,"react":197}],201:[function(require,module,exports){
+},{"./Board.jsx":203,"./Table.jsx":205,"react":197}],205:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -21350,7 +21865,7 @@ var Table = function (_React$Component) {
 
 exports.default = Table;
 
-},{"react":197}],202:[function(require,module,exports){
+},{"react":197}],206:[function(require,module,exports){
 'use strict';
 
 var _react = require('react');
@@ -21369,4 +21884,4 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 _reactDom2.default.render(_react2.default.createElement(_Menu2.default, null), document.getElementById('react-app'));
 
-},{"./Menu.jsx":198,"react":197,"react-dom":16}]},{},[202]);
+},{"./Menu.jsx":202,"react":197,"react-dom":16}]},{},[206]);

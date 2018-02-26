@@ -1,18 +1,13 @@
 import util from './util.js';
-import Board from './Board.jsx';
+import Board from './../Solitaire/Board.jsx';
 
 class DNA {
     constructor(){
 
         // The genetic sequence
-        this.genes = [];
+        this.game = new Board();
+        this.genes = this.game.getRandomGame();
         this.fitness = 0;
-        
-        // Random DNA generated from an attempt at playing
-        this.board = new Board();
-
-        this.genes = this.board.getRandomGame();
-        this.genes = this.genes.map(() => util.newChar());
     }
 
     // Converts character array to a String
@@ -22,13 +17,7 @@ class DNA {
 
     // Fitness function (returns floating point % of "correct" characters)
     calcFitness(target) {
-        let score = 0;
-
-        this.genes.forEach((gene, i) => {
-            if (gene === target.charAt(i)) score += 1;
-        });
-
-        this.fitness = score / target.length;
+        this.fitness = (33 - this.game.getScore()) / 32;
     }
 
     // Cross DNA with partner to produce child
